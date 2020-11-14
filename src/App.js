@@ -1,30 +1,47 @@
-import logo from './logo.svg';
-import './App.css';
-import HomePage from './pages/homepage/homepage.component';
-import ShopPage from './pages/shop/shop.component';
-import Header from './components/header/header.component';
-import SignInAndSignUpPage from './pages/sign-in-and-sign-up/sign-in-and-sign-up.component';
+import logo from "./logo.svg";
+import "./App.css";
+import HomePage from "./pages/homepage/homepage.component";
+import ShopPage from "./pages/shop/shop.component";
+import Header from "./components/header/header.component";
+import SignInAndSignUpPage from "./pages/sign-in-and-sign-up/sign-in-and-sign-up.component";
 
-import { Switch, Route } from 'react-router-dom';
-import { auth } from './firebase/firebase.utils';
-import React from 'react';
+import { Switch, Route } from "react-router-dom";
+import { auth, createUserProfileDocument } from "./firebase/firebase.utils";
+import React from "react";
 
 class App extends React.Component {
-
   unsubscribeFromAuth = null;
 
-  constructor( ){
+  constructor() {
     super();
     this.state = {
-      currentUser: null
+      currentUser: null,
     };
   }
 
   componentDidMount() {
-    this.unsubscribeFromAuth = auth.onAuthStateChanged((user) => {
+    this.unsubscribeFromAuth = auth.onAuthStateChanged(async (userAuth) => {
+      if (userAuth) {
+        const userRef = await createUserProfileDocument(userAuth);
+
+        userRef.onSnapshot((snapShot) => {
+          // console.log(snapShot.data());
+          this.setState(
+            {
+              currentUser: {
+                id: snapShot.id,
+                ...snapShot.data(),
+              },
+            }
+          );
+
+          console.log(this.state);
+        });
+      }
+      // console.log(this.state);
       this.setState({
-        currentUser: user
-      })
+        currentUser: userAuth
+      });
     });
   }
 
@@ -34,14 +51,14 @@ class App extends React.Component {
 
   render() {
     return (
-    <div className="App">
-      <Header currentUser={this.state.currentUser}/>
-      <Switch>
-        <Route exact path="/" component={HomePage}/>
-        <Route path="/shop" component={ShopPage}/>
-        <Route path="/signin" component={SignInAndSignUpPage}/>
-      </Switch>
-    </div>
+      <div className="App">
+        <Header currentUser={this.state.currentUser} />
+        <Switch>
+          <Route exact path="/" component={HomePage} />
+          <Route path="/shop" component={ShopPage} />
+          <Route path="/signin" component={SignInAndSignUpPage} />
+        </Switch>
+      </div>
     );
   }
 }
