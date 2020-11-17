@@ -3,7 +3,6 @@ import React from 'react';
 import { connect  } from 'react-redux';
 import { createStructuredSelector } from 'reselect'
 import './checkout.styles.scss';
-import { createUserProfileDocument } from '../../firebase/firebase.utils';
 import { selectCartItems, selectCartTotal } from '../../redux/cart/cart.selector';
 import CheckoutItem from '../../components/checkout-item/checkout-item.component';
 
